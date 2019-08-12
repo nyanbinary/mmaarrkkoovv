@@ -1,0 +1,18 @@
+{
+  "name": "mmaarrkkoovv",
+  "version": "1.0.0",
+  "description": "a telegram bot for a markov chain, but using the last 2 words instead of 1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com-nb:nyanbinary/mmaarrkkoovv.git"
+  },
+  "author": "",
+  "license": "MPL-2.0",
+  "dependencies": {
+    "moment": "^2.24.0"
+  }
+}
