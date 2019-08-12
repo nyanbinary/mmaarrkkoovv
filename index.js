@@ -88,21 +88,10 @@ async function main() {
     const token = require('fs').readFileSync('./TOKEN').toString().trim();
     await network.connect(token);
 
-    /*const pbtoken = require('fs').readFileSync('./TOKEN_PASTEBIN').toString().trim();
-    pastebin.connect(pbtoken);*/
+    // const pbtoken = require('fs').readFileSync('./TOKEN_PASTEBIN').toString().trim();
+    // pastebin.connect(pbtoken);
 
     markov.loadall();
-
-    /*
-    let chainid, chain = markov.chain(chainid = 67224235);//-1001404974288);
-    for (let x of JSON.parse(require('fs').readFileSync('./TOCHAIN'))) {
-        if (x === null || x === 'None') continue;
-
-        chain.process(x);
-    }
-    markov.save(chainid);
-    return;
-    */
 
     network.polling((update) => {
         _notice(update.display());
