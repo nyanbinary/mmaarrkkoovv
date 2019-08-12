@@ -1,4 +1,6 @@
 const network = require('./network');
+const pastebin = require('./pastebin');
+
 const { _debug, _info, _notice, _warning, _error, _critical } = require('./logging');
 
 const markov = require('./Markov/markov.js');
@@ -19,9 +21,9 @@ async function handleCommand(message) {
     let _cmd = message.getCommand(network.me.username);
     if (_cmd === null) return false;
 
-    const [cmd, args, directed] = _cmd;
-
     _info(`Command ${JSON.stringify(_cmd)} issued by ${message.from.display()}`);
+
+    const { cmd, args, directed } = _cmd;
 
     if (cmd === '/generate') {
         network.send(chatid, markov.chain(chatid).generate());
@@ -64,6 +66,9 @@ async function handleCommand(message) {
 async function main() {
     const token = require('fs').readFileSync('./TOKEN').toString().trim();
     await network.connect(token);
+
+    const pbtoken = require('fs').readFileSync('./TOKEN_PASTEBIN').toString().trim();
+    pastebin.connect(pbtoken);
 
     markov.loadall();
 

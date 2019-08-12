@@ -65,10 +65,10 @@ Message.prototype.getCommand = function(username) {
         if (cmd.includes('@')) {
             let parts = cmd.split('@');
             if (parts.length === 2 && parts[1] === username) {
-                return [parts[0], args, true];
+                return { cmd: parts[0], args, directed: true };
             }
         } else {
-            return [cmd, args, false];
+            return { cmd, args, directed: false };
         }
     }
 

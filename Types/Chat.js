@@ -7,7 +7,7 @@ const Enum = require('./Enum');
 
 const Chat = module.exports = Struct('Chat', {
     id: [Integer, undefined],
-    type: [Enum(['private', 'group', 'supergroup', 'channel']), undefined],
+    type: [Enum('private', 'group', 'supergroup', 'channel'), undefined],
 
     // Ignore these fields
     first_name: void 0,

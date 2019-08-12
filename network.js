@@ -119,21 +119,27 @@ function polling(callback, options = {}) {
         offset: 0,
     }, options);
 
-    call('getUpdates', options, List(Update)).then((updates) => {
-        let offset = options.offset;
+    call('getUpdates', options, List(Update))
+        .then((updates) => {
+            let offset = options.offset;
 
-        for (let update of updates) {
-            offset = Math.max(offset, update.update_id + 1);
-            callback(update);
-        }
+            for (let update of updates) {
+                offset = Math.max(offset, update.update_id + 1);
+                callback(update);
+            }
 
-        options.offset = offset;
-
-        polling(callback, options);
-    });
+            options.offset = offset;
+        })
+        .catch((err) => {
+            _error(err);
+        })
+        .finally(() => {
+            polling(callback, options);
+        });
 };
 
 function send(chat_id, text, options = {}) {
+    // Apply defaults
     options = Object.assign({
         chat_id,
         text,

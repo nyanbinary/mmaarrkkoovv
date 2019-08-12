@@ -50,7 +50,7 @@ Chain.prototype.process = function(text) {
 };
 
 function randomchild(root) {
-    let rand = Math.floor(Math.random() * root.a); // 0 (in) ~ root.a (ex)
+    let rand = Math.floor(Math.random() * root.a); // 0 (inc) ~ root.a (exc)
 
     for (let nextk of Object.keys(root.c)) {
         let nextv = root.c[nextk];
@@ -67,7 +67,12 @@ function randomchild(root) {
 Chain.prototype.generate = function() {
     let word = '';
     do {
-        word = this._generate();
+        try {
+            word = this._generate();
+        } catch (e) {
+            _error(e);
+            word = false;
+        }
     } while (!word || word.length < 2);
 
     return word;
@@ -76,9 +81,6 @@ Chain.prototype.generate = function() {
 Chain.prototype._generate = function() {
     const root = this.chain;
     if (root.a === 0) return;
-
-
-    let generated = [];
 
     /**
      FIRST = root[random]
@@ -95,26 +97,24 @@ Chain.prototype._generate = function() {
      ...
      */
 
+    let generated = '';
+
     let [ak, av] = randomchild(root);
+    generated += ak;
+
     let [bk, bv] = randomchild(av);
+    generated += ' ' + bk;
 
-    console.log("first", ak, av);
-    console.log("second", bk, bv);
-
-    generated.push(ak);
-    generated.push(bk);
-
-    while (true) {
+    while (generated.length < 200) {
         let _tmp = randomchild(bv);
         if (_tmp === null) break;
-
-        console.log("then", _tmp);
 
         let [ck] = _tmp;
         [ak, av] = [bk, root.c[bk].c];
         [bk, bv] = [ck, av[ck]];
-        generated.push(ck);
+
+        generated += ' ' + ck;
     }
 
-    return generated.join(' ');
+    return generated;
 };
