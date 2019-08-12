@@ -1,3 +1,11 @@
+'use strict';
+
+const { _debug, _info, _notice, _warning, _error, _critical } = require('./logging');
+const moment = require('moment');
+const https = require('https');
+const querystring = require('querystring');
+
+
 const baseurl = 'https://pastebin.com/api/api_post.php';
 
 let api_dev_key = null;
@@ -44,19 +52,19 @@ function create(content, params) {
     }, params);
 
     return new Promise((resolve, reject) => {
-        const postData = JSON.stringify(params);
+        const postData = querystring.stringify(params);
 
         let options = {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded',
                 'Content-Length': postData.length,
             },
         };
 
         _debug(`[${moment().format()}] pastebin`);
 
-        const req = https.request(url, options, (res, err) => {
+        const req = https.request(baseurl, options, (res, err) => {
             if (err) return reject(_error(err));
 
             let data = '';

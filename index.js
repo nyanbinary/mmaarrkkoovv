@@ -36,8 +36,17 @@ async function handleCommand(message) {
         const ok = markov.saveall();
         network.send(chatid, (ok ? 'Saved' : 'Failed to save') + ' all chains');
     }
+    else if (cmd === '/debug_pastebin') {
+        const data = JSON.stringify(markov.chain(chatid).json(), null, '\t');
+        const url = await pastebin.create(data, {
+            api_paste_name: 'chain.json',
+            api_paste_format: pastebin.format.JSON,
+        });
+        network.send(chatid, "<b><a href='" + url + "'>chain.json</a></b>");
+    }
     else if (cmd === '/debug') {
-        network.send(chatid, '<pre>' + JSON.stringify(markov.chain(chatid).json(), null, '\t') + '</pre>');
+        const data = JSON.stringify(markov.chain(chatid).json(), null, '\t');
+        network.sendData(chatid, data, 'chain@' + chatid + '.json');
     }
     else if (cmd === '/drop') {
         if (await admin()) {

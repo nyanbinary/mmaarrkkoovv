@@ -2,6 +2,7 @@
 
 const https = require('https');
 const moment = require('moment');
+const FormData = require('form-data');
 
 const Update = require('./Types/Update');
 const User = require('./Types/User');
@@ -17,7 +18,7 @@ const { _debug, _info, _notice, _warning, _error, _critical } = require('./loggi
 
 module.exports = {
     connect, call,
-    polling, send,
+    polling, send, sendData,
     getChatMember,
 
     get me() {
@@ -39,7 +40,7 @@ function connect(token) {
 
 let apicalls = 0;
 
-function call(name, params, struct) {
+function call(name, params, struct, type = 'json') {
     return new Promise((resolve, reject) => {
         let apicall = ++apicalls;
 
@@ -48,15 +49,49 @@ function call(name, params, struct) {
 
         const url = baseurl + name;
 
-        const postData = JSON.stringify(params);
+        let options, postData;
 
-        let options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': postData.length,
-            },
-        };
+        if (type === 'json') {
+            postData = JSON.stringify(params);
+
+            options = {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Content-Length': postData.length,
+                },
+            };
+        }
+        else if (type === 'file') {
+            // Convert to formdata
+            let form = new FormData();
+            for (let key in params) {
+                let val = params[key];
+                if (!val) continue;
+
+                let options = {};
+                let data;
+
+                // ['FILE', filename, data]
+                if (Array.isArray(val) && val[0] === 'FILE') {
+                    options.filename = val[1];
+                    data = val[2];
+                } else {
+                    data = val;
+                }
+
+                form.append(key, data, options);
+            }
+
+            options = {
+                method: 'POST',
+                headers: form.getHeaders(),
+            };
+
+            postData = form.getBuffer();
+        }
+        else
+            throw new Error("wrong type for call");
 
         let starttime = moment();
 
@@ -65,7 +100,7 @@ function call(name, params, struct) {
             log += `[${starttime.format()}]`;
             log += ` #${apicall}`;
             log += ` /${name}`;
-            log += ` | ${postData}`;
+            log += ` | ${JSON.stringify(params)}`;
             if (struct && struct.name) log += ' -> ' + struct.name;
             _debug(log);
         }
@@ -154,6 +189,22 @@ function send(chat_id, text, options = {}) {
         return message;
     });
 }
+
+function sendData(chat_id, data, name = 'bin', options) {
+    options = Object.assign({
+        chat_id,
+        document: ['FILE', name, data],
+        parse_mode: undefined,
+        disable_notification: false,
+        reply_to_message_id: undefined,
+    }, options);
+
+    return call('sendDocument', options, Message, 'file').then((message) => {
+        _debug(message.display());
+        return message;
+    });
+}
+
 
 function getChatMember(chat_id, user_id) {
     return call('getChatMember', { chat_id, user_id }, ChatMember).then((cm) => {

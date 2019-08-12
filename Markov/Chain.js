@@ -66,6 +66,7 @@ function randomchild(root) {
 
 Chain.prototype.generate = function() {
     let word = '';
+    let tries = 0;
     do {
         try {
             word = this._generate();
@@ -73,7 +74,7 @@ Chain.prototype.generate = function() {
             _error(e);
             word = false;
         }
-    } while (!word || word.length < 2);
+    } while ((!word || word.length < 2) && ++tries < 10);
 
     return word;
 };
@@ -105,7 +106,8 @@ Chain.prototype._generate = function() {
     let [bk, bv] = randomchild(av);
     generated += ' ' + bk;
 
-    while (generated.length < 200) {
+    let steps = 0;
+    while (generated.length < 200 && ++steps < 100) {
         let _tmp = randomchild(bv);
         if (_tmp === null) break;
 
