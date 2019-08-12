@@ -57,6 +57,8 @@ function randomchild(root) {
     let rand = Math.floor(Math.random() * root.a); // 0 (inc) ~ root.a (exc)
 
     for (let nextk of Object.keys(root.c)) {
+        if (!nextk) continue; // @temporary @hotfix skip empty keys
+
         let nextv = root.c[nextk];
 
         rand -= nextv.a;
