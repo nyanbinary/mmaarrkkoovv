@@ -12,6 +12,18 @@ function isAdmin(chat_id, user_id) {
     });
 }
 
+let dropTokens = {};
+
+function randstr(len) {
+    let str = '';
+
+    do {
+        str += Math.random().toString(36).substring(2);
+    } while (str.length < len);
+
+    return str.substring(0, len);
+}
+
 
 async function handleCommand(message) {
     const chatid = message.chat.id;
@@ -59,10 +71,24 @@ async function handleCommand(message) {
     }
     else if (cmd === '/drop') {
         if (await admin()) {
-            markov.drop(chatid);
-            network.send(chatid, 'Dropped current chain');
+            let dropToken = dropTokens[chatid] = randstr(6);
+            network.send(chatid, `Click /drop_${dropToken} if you're absolutely sure`);
         } else {
             network.send(chatid, 'Not enough permissions');
+        }
+    }
+    else if (cmd.startsWith('/drop_')) {
+        if (await admin()) {
+            let dropToken = cmd.split('_')[1];
+            if (dropToken === dropTokens[chatid]) {
+                markov.drop(chatid);
+                delete dropTokens[chatid];
+                network.send(chatid, 'Bye chain');
+            } else {
+                network.send(chatid, 'Invalid drop token');
+            }
+        } else {
+            network.send(chatid, 'Thought you were clever huh');
         }
     }
     else if (cmd === '/load') {
