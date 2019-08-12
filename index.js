@@ -75,6 +75,9 @@ async function handleCommand(message) {
         markov.loadall(overwrite);
         network.send(chatid, 'Loaded all chains');
     }
+    else if (cmd === '/echo') {
+        network.send(chatid, args.join(' '));
+    }
     else if (directed) {
         network.send(chatid, 'Unknown command');
     }
@@ -90,6 +93,17 @@ async function main() {
 
     markov.loadall();
 
+    /*
+    let chainid, chain = markov.chain(chainid = 67224235);//-1001404974288);
+    for (let x of JSON.parse(require('fs').readFileSync('./TOCHAIN'))) {
+        if (x === null || x === 'None') continue;
+
+        chain.process(x);
+    }
+    markov.save(chainid);
+    return;
+    */
+
     network.polling((update) => {
         _notice(update.display());
 
@@ -97,7 +111,7 @@ async function main() {
             handleCommand(update.message);
 
             const text = update.message.getText();
-            if (text) {
+            if (text && !text.startsWith('/')) {
                 const chatid = update.message.chat.id;
                 markov.chain(chatid).process(text);
             }

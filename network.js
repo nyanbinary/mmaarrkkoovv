@@ -60,8 +60,8 @@ function call(name, params, struct, type = 'json') {
             options = {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': postData.length,
+                    'Content-Type': 'application/json; charset=utf-8',
+                    // 'Content-Length': Buffer.from(postData).length,
                 },
             };
         }
@@ -103,7 +103,7 @@ function call(name, params, struct, type = 'json') {
             log += `[${starttime.format()}]`;
             log += ` #${apicall}`;
             log += ` /${name}`;
-            if (LOGDATA) log += ` | ${JSON.stringify(params)}`;
+            if (LOGDATA) log += ` | ${postData}`;
             if (struct && struct.name) log += ' -> ' + struct.name;
             _debug(log);
         }
@@ -186,19 +186,23 @@ function send(chat_id, text, options = {}) {
         chat_id,
         text,
         parse_mode: 'html',
-        disable_web_page_preview: true,
-        disable_notification: false,
-        reply_to_message_id: undefined,
+        //disable_web_page_preview: true,
+        //disable_notification: false,
+        //reply_to_message_id: 0,
     }, options);
 
     if (options.parse_mode === 'plain') {
         delete options.parse_mode;
     }
 
-    return call('sendMessage', options, Message).then((message) => {
-        _debug(message.display());
-        return message;
-    });
+    return call('sendMessage', options, Message)
+        .then((message) => {
+            _debug(message.display());
+            return message;
+        })
+        .catch((err) => {
+            _error(err);
+        });
 }
 
 function sendData(chat_id, data, name = 'bin', options) {
