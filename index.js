@@ -1,5 +1,5 @@
 const network = require('./network');
-const pastebin = require('./pastebin');
+//const pastebin = require('./pastebin');
 
 const { _debug, _info, _notice, _warning, _error, _critical } = require('./logging');
 
@@ -26,7 +26,16 @@ async function handleCommand(message) {
     const { cmd, args, directed } = _cmd;
 
     if (cmd === '/generate') {
-        network.send(chatid, markov.chain(chatid).generate(), 'plain');
+        let m = markov.chain(chatid).generate(args);
+        if (m === null) {
+            if (args.length > 0) {
+                network.send(chatid, "Invalid start point");
+            } else {
+                network.send(chatid, "Empty chain");
+            }
+        } else {
+            network.send(chatid, m, 'plain');
+        }
     }
     else if (cmd === '/save') {
         const ok = markov.save(chatid);
@@ -76,8 +85,8 @@ async function main() {
     const token = require('fs').readFileSync('./TOKEN').toString().trim();
     await network.connect(token);
 
-    const pbtoken = require('fs').readFileSync('./TOKEN_PASTEBIN').toString().trim();
-    pastebin.connect(pbtoken);
+    /*const pbtoken = require('fs').readFileSync('./TOKEN_PASTEBIN').toString().trim();
+    pastebin.connect(pbtoken);*/
 
     markov.loadall();
 

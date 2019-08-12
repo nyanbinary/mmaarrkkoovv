@@ -1,3 +1,5 @@
+const { _debug, _info, _notice, _warning, _error, _critical } = require('../logging');
+
 function step(root, next, last = false) {
     if (typeof root === 'undefined' || typeof next === 'undefined') return undefined;
 
@@ -64,24 +66,28 @@ function randomchild(root) {
     return null;
 }
 
-Chain.prototype.generate = function() {
+Chain.prototype.generate = function(start = []) {
     let word = '';
     let tries = 0;
     do {
         try {
-            word = this._generate();
+            word = this._generate([...start]);
         } catch (e) {
             _error(e);
-            word = false;
+            word = null;
         }
-    } while ((!word || word.length < 2) && ++tries < 10);
+    } while (++tries < 10 && !(word && word.length > 1));
+
+    if (tries > 1) {
+        _notice("Failed generating - trying again");
+    }
 
     return word;
 };
 
-Chain.prototype._generate = function() {
+Chain.prototype._generate = function(start = []) {
     const root = this.chain;
-    if (root.a === 0) return;
+    if (root.a === 0) return null;
 
     /**
      FIRST = root[random]
@@ -100,10 +106,24 @@ Chain.prototype._generate = function() {
 
     let generated = '';
 
-    let [ak, av] = randomchild(root);
+    let ak, av;
+    if (start.length > 0) {
+        ak = start.shift();
+        av = root.c[ak];
+    } else {
+        [ak, av] = randomchild(root);
+    }
+
     generated += ak;
 
-    let [bk, bv] = randomchild(av);
+    let bk, bv;
+    if (start.length > 0) {
+        bk = start.shift();
+        bv = av.c[bk];
+    } else {
+        [bk, bv] = randomchild(av);
+    }
+
     generated += ' ' + bk;
 
     let steps = 0;
