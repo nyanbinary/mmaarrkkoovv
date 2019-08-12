@@ -41,6 +41,9 @@ function connect(token) {
 let apicalls = 0;
 
 function call(name, params, struct, type = 'json') {
+    const LOGDATA = params._LOGDATA !== false;
+    delete params._LOGDATA;
+
     return new Promise((resolve, reject) => {
         let apicall = ++apicalls;
 
@@ -100,7 +103,7 @@ function call(name, params, struct, type = 'json') {
             log += `[${starttime.format()}]`;
             log += ` #${apicall}`;
             log += ` /${name}`;
-            log += ` | ${JSON.stringify(params)}`;
+            if (LOGDATA) log += ` | ${JSON.stringify(params)}`;
             if (struct && struct.name) log += ' -> ' + struct.name;
             _debug(log);
         }
@@ -117,7 +120,7 @@ function call(name, params, struct, type = 'json') {
                     let log = '';
                     log += `[+${moment().diff(starttime)} ms]`;
                     log += ` #${apicall}`;
-                    log += ' | ' + data;
+                    if (LOGDATA) log += ' | ' + data;
                     _debug(log);
                 }
 
@@ -174,6 +177,10 @@ function polling(callback, options = {}) {
 };
 
 function send(chat_id, text, options = {}) {
+    if (typeof options === 'string') {
+        options = { parse_mode: options };
+    }
+
     // Apply defaults
     options = Object.assign({
         chat_id,
@@ -184,6 +191,10 @@ function send(chat_id, text, options = {}) {
         reply_to_message_id: undefined,
     }, options);
 
+    if (options.parse_mode === 'plain') {
+        delete options.parse_mode;
+    }
+
     return call('sendMessage', options, Message).then((message) => {
         _debug(message.display());
         return message;
@@ -192,6 +203,8 @@ function send(chat_id, text, options = {}) {
 
 function sendData(chat_id, data, name = 'bin', options) {
     options = Object.assign({
+        _LOGDATA: false,
+
         chat_id,
         document: ['FILE', name, data],
         parse_mode: undefined,
@@ -199,10 +212,7 @@ function sendData(chat_id, data, name = 'bin', options) {
         reply_to_message_id: undefined,
     }, options);
 
-    return call('sendDocument', options, Message, 'file').then((message) => {
-        _debug(message.display());
-        return message;
-    });
+    return call('sendDocument', options, Message, 'file');
 }
 
 

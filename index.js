@@ -26,7 +26,7 @@ async function handleCommand(message) {
     const { cmd, args, directed } = _cmd;
 
     if (cmd === '/generate') {
-        network.send(chatid, markov.chain(chatid).generate());
+        network.send(chatid, markov.chain(chatid).generate(), 'plain');
     }
     else if (cmd === '/save') {
         const ok = markov.save(chatid);
@@ -36,14 +36,14 @@ async function handleCommand(message) {
         const ok = markov.saveall();
         network.send(chatid, (ok ? 'Saved' : 'Failed to save') + ' all chains');
     }
-    else if (cmd === '/debug_pastebin') {
+    /*else if (cmd === '/debug_pastebin') {
         const data = JSON.stringify(markov.chain(chatid).json(), null, '\t');
         const url = await pastebin.create(data, {
             api_paste_name: 'chain.json',
             api_paste_format: pastebin.format.JSON,
         });
         network.send(chatid, "<b><a href='" + url + "'>chain.json</a></b>");
-    }
+    }*/
     else if (cmd === '/debug') {
         const data = JSON.stringify(markov.chain(chatid).json(), null, '\t');
         network.sendData(chatid, data, 'chain@' + chatid + '.json');
