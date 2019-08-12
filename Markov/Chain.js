@@ -52,6 +52,8 @@ Chain.prototype.process = function(text) {
 };
 
 function randomchild(root) {
+    if (typeof root === 'undefined') return null;
+
     let rand = Math.floor(Math.random() * root.a); // 0 (inc) ~ root.a (exc)
 
     for (let nextk of Object.keys(root.c)) {
@@ -110,6 +112,7 @@ Chain.prototype._generate = function(start = []) {
     if (start.length > 0) {
         ak = start.shift();
         av = root.c[ak];
+        if (typeof av === 'undefined') return null;
     } else {
         [ak, av] = randomchild(root);
     }
@@ -120,6 +123,7 @@ Chain.prototype._generate = function(start = []) {
     if (start.length > 0) {
         bk = start.shift();
         bv = av.c[bk];
+        if (typeof bv === 'undefined') return null;
     } else {
         [bk, bv] = randomchild(av);
     }
