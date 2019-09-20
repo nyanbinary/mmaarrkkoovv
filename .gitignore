@@ -1,3 +1,5 @@
 TOKEN*
+ADMINS*
+
 node_modules
 *.session
